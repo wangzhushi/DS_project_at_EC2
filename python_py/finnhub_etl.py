@@ -2,10 +2,12 @@ import pytz
 import datetime
 from project_utils import db_util
 import csv as csv
-import sqlite3
-from sqlalchemy import create_engine
 import pandas
 import time
+from python_py.project_utils.config import API_KEY_FINN
+import finnhub
+import pandas as pd
+import pandas.io.sql as pdsqlio
 
 
 def read_stock_list(file_name):
@@ -17,10 +19,26 @@ def read_stock_list(file_name):
     return stk_list
 
 
+def download_data_from_finnhub(security_symbol, interval, start_time, end_time):
+    api_key_finn = API_KEY_FINN["API_KEY_FINN"]
+    finnhub_client = finnhub.Client(api_key=api_key_finn)
+    try:
+        raw_data = finnhub_client.stock_candles(security_symbol, interval, start_time, end_time)
+        raw_data_df = pd.DataFrame(data=raw_data)
+        return raw_data_df
+    except Exception as e:
+        print(e, security_symbol, "api fetching failed")
+        return None
+
+
+# test download_data_from_finnhub
+# df = download_data_from_finnhub('AAPL', 'D', 1590988249, 1591852249)
+# print(df.head())
+
 def daily_etl(interval, start_time, end_time):
     # stock_list = read_stock_list("../../postgresql/data/harry_sec_list_1000.csv")
-    stock_list = read_stock_list("harry_sec_list_1000.csv")
-    # stock_list = ['AAPL', 'TSLA']
+    # stock_list = read_stock_list("harry_sec_list_1000.csv")
+    stock_list = ['AAPL', 'TSLA']
     # db = db_util.connect_to_db()
     # engine = create_engine('sqlite://', echo=False)
     engine = db_util.create_db_engine()
@@ -34,7 +52,7 @@ def daily_etl(interval, start_time, end_time):
         start = eastern_tz.localize(datetime.datetime.today())
         es = each_stock
         # es = 'AAPL'
-        raw_df = db_util.download_data_from_finnhub(es, res, start_time, end_time)
+        raw_df = download_data_from_finnhub(es, res, start_time, end_time)
         raw_df['symbol'] = es
         raw_df['trade_date_int'] = [db_util.datetime_to_int_todate(datetime.datetime.fromtimestamp(x).date())
                                     for x in raw_df['t']]
