@@ -1,8 +1,7 @@
 import psycopg2
 
-from python_py.project_utils.config import DB_CONFIG
+from project_utils.config import DB_CONFIG
 from sqlalchemy import create_engine
-import os
 
 
 def connect_to_db():

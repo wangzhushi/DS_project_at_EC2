@@ -3,11 +3,9 @@ import datetime
 from project_utils import db_util
 import csv as csv
 import pandas
-import time
-from python_py.project_utils.config import API_KEY_FINN
+from project_utils.config import API_KEY_FINN
 import finnhub
 import pandas as pd
-import pandas.io.sql as pdsqlio
 
 
 def read_stock_list(file_name):

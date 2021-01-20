@@ -2,8 +2,9 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from twilio.rest import Client
-from python_py.project_utils.config import TWILIO_CONFIG
-from python_py.project_utils.config import GMAIL_ACCT_CONFIG
+from project_utils.config import TWILIO_CONFIG
+from project_utils.config import GMAIL_ACCT_CONFIG
+
 
 def send_sms(sms_body):
     # Your Account Sid and Auth Token from twilio.com/console
