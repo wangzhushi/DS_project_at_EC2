@@ -24,17 +24,22 @@ def create_db_engine():
     initiate an pandas to_sql db engine
     :return: db engine object
     """
-    database = ''.join(DB_CONFIG["DATABASE"])
+    database = DB_CONFIG["DATABASE"]
     user = DB_CONFIG["USER"]
     password = DB_CONFIG["PASSWORD"]
     host = DB_CONFIG["HOST"]
     port = DB_CONFIG["PORT"]
 
 #    url_eg = f'postgresql://user:{password}@{host}:{port}/{database}'
-    url_eg = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database
+#     url_eg = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database
+#     #    db_engine = create_engine('postgresql://scott:tiger@localhost/mydatabase')
+#     db_engine = create_engine(url_eg, pool_size=10, max_overflow=20)
+
+    db_engine = create_engine("postgresql://{user}:{pw}@{host}:{port}/{db}".format(
+                            user=user, pw=password,
+                            host=host, port=port, db=database))
+
     # print(url_eg)
-#    db_engine = create_engine('postgresql://scott:tiger@localhost/mydatabase')
-    db_engine = create_engine(url_eg, pool_size=10, max_overflow=20)
 #        driver='postgresql://',
 #        username=DB_CONFIG["USER"],
 #        password=DB_CONFIG["PASSWORD"],
