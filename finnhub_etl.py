@@ -5,6 +5,7 @@ import csv as csv
 import pandas
 from project_utils.config import API_KEY_FINN
 import finnhub
+import time
 
 
 def read_stock_list(file_name):
@@ -45,7 +46,10 @@ def daily_etl(interval, start_time, end_time):
     elif interval == '1m':
         res = '1'
 
+    num_of_stock = 0
+
     for each_stock in stock_list:
+        num_of_stock = num_of_stock + 1
         start = eastern_tz.localize(datetime.datetime.today())
         es = each_stock
         # es = 'AAPL'
@@ -65,8 +69,9 @@ def daily_etl(interval, start_time, end_time):
         raw_df.to_sql(table, engine, index=False, chunksize=None, if_exists='append', method="multi")
 
         now = eastern_tz.localize(datetime.datetime.today())
-        print('finish ' + each_stock + ' time: ' + str(now - start) + 'total time: '+ str(now - process_start_time) )
-
+        print('finish ' + each_stock + ' time: ' + str(now - start) + 'total time: ' + str(now - process_start_time)
+              + 'total numbers: ' + str(num_of_stock))
+        time.sleep(0.1)
     return True
 
 
