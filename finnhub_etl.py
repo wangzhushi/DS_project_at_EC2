@@ -5,7 +5,6 @@ import csv as csv
 import pandas
 from project_utils.config import API_KEY_FINN
 import finnhub
-import pandas as pd
 
 
 def read_stock_list(file_name):
@@ -22,10 +21,10 @@ def download_data_from_finnhub(security_symbol, interval, start_time, end_time):
     finnhub_client = finnhub.Client(api_key=api_key_finn)
     try:
         raw_data = finnhub_client.stock_candles(security_symbol, interval, start_time, end_time)
-        raw_data_df = pd.DataFrame(data=raw_data)
+        raw_data_df = pandas.DataFrame(data=raw_data)
         return raw_data_df
-    except Exception as e:
-        print(e, security_symbol, "api fetching failed")
+    except Exception as error:
+        print(error, security_symbol, "api fetching failed")
         return None
 
 
@@ -35,12 +34,12 @@ def download_data_from_finnhub(security_symbol, interval, start_time, end_time):
 
 def daily_etl(interval, start_time, end_time):
     # stock_list = read_stock_list("../../postgresql/data/harry_sec_list_1000.csv")
-    # stock_list = read_stock_list("harry_sec_list_1000.csv")
-    stock_list = ['AAPL', 'TSLA']
-    # db = db_util.connect_to_db()
+    stock_list = read_stock_list("harry_sec_list_1000.csv")
+    # stock_list = ['AAPL', 'TSLA']
     # engine = create_engine('sqlite://', echo=False)
-    engine = db_util.create_db_engine()
+    engine = db_util.sqlalchemy_create_db_engine()
     table = f"us_equity_{interval}_finnhub"
+    res = 'D'
     if interval == 'daily':
         res = 'D'
     elif interval == '1m':
@@ -83,11 +82,17 @@ if __name__ == '__main__':
     yesterday = today + datetime.timedelta(days=-1)
     interval = None
     base_time = datetime.datetime(1970, 1, 1).date()
-    init_mark_day = datetime.datetime(2010, 1, 1).date()
+    init_mark_day = datetime.datetime(2000, 1, 1).date()
     # cut_off_day = datetime.datetime(2001, 1, 1).date()
     cut_off_day = today
+    start_time = int((yesterday - base_time).total_seconds())
+    end_time = int((today - base_time).total_seconds())
 
     if scope == 'ALL':
+        psycopg2_connect = db_util.psycopg2_connect_to_db()
+        sql_truncate_daily = "truncate table us_equity_daily_finnhub"
+        db_util.psycopg2_db_dml(psycopg2_conn=psycopg2_connect, sql_dml=sql_truncate_daily)
+
         start_time = int((init_mark_day - base_time).total_seconds())
         end_time = int((cut_off_day - base_time).total_seconds())
         if resolution == "D":
@@ -118,6 +123,9 @@ if __name__ == '__main__':
     if interval is not None:
         etl = daily_etl(interval, start_time, end_time)
 
-
+    db_engine = db_util.sqlalchemy_create_db_engine()
+    sql_select = "select * from us_equity_daily_finnhub where symbol= 'AAPL' and trade_date_int = 20000102"
+    check_pd = db_util.sqlalchemy_db_query(sql_select=sql_select, db_engine=db_engine)
+    print(check_pd.head())
 
 
