@@ -2,6 +2,8 @@ import psycopg2
 import pandas
 from project_utils.config import DB_CONFIG
 from sqlalchemy import create_engine
+import datetime as dt
+import pytz
 
 
 def psycopg2_connect_to_db():
@@ -59,12 +61,22 @@ def sqlalchemy_create_db_engine():
 # print(df.head())
 
 
-def datetime_to_int(dt):
-    return int(dt.strftime("%Y%m%d%H%M%S"))
+def datetime_to_int(day):
+    return int(day.strftime("%Y%m%d%H%M"))
 
 
-def datetime_to_int_todate(dt):
-    return int(dt.strftime("%Y%m%d"))
+def datetime_to_int_todate(day):
+    return int(day.strftime("%Y%m%d"))
+
+
+def dt_utc_start_end(date_input=dt.date.today()):
+    start_of_the_day = dt.datetime.combine(date_input, dt.time(00, 00, 00))
+    end_of_the_day = dt.datetime.combine(date_input, dt.time(23, 59, 59))
+    base_time = dt.datetime(1970, 1, 1, 00, 00, 00)
+    start_of_the_day_utc = int((start_of_the_day - base_time).total_seconds())
+    end_of_the_day_utc = int((end_of_the_day - base_time).total_seconds())
+
+    return start_of_the_day, end_of_the_day, start_of_the_day_utc, end_of_the_day_utc
 
 
 def psycopg2_db_dml(psycopg2_conn=None, sql_dml=''):
