@@ -62,14 +62,26 @@ def sqlalchemy_create_db_engine():
 
 
 def datetime_to_int(day):
-    return int(day.strftime("%Y%m%d%H%M"))
+    """
+    ;:arg a date
+    :return the the integer YYYYMMDDHHMMSS of input date
+    """
+    return int(day.strftime("%Y%m%d%H%M%S"))
 
 
 def datetime_to_int_todate(day):
+    """
+    ;:arg a date
+    :return the the integer YYYYMMDD of input date
+    """
     return int(day.strftime("%Y%m%d"))
 
 
 def dt_utc_start_end(date_input=dt.date.today()):
+    """
+    ;:arg a date
+    :return the start/end of the day UTC information of input date
+    """
     start_of_the_day = dt.datetime.combine(date_input, dt.time(00, 00, 00))
     end_of_the_day = dt.datetime.combine(date_input, dt.time(23, 59, 59))
     base_time = dt.datetime(1970, 1, 1, 00, 00, 00)
