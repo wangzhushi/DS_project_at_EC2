@@ -90,6 +90,11 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
 #        raw_df.drop(columns='index')
 
 #        raw_df.to_sql(table, engine, index=False, chunksize=None, if_exists='append', method="multi")
+        index_names = raw_df[(raw_df['trade_date_int'] < day_to_run_int)].index
+        raw_df.drop(index_names, inplace=True)
+        index_names = raw_df[(raw_df['trade_date_int'] > day_to_run_int)].index
+        raw_df.drop(index_names, inplace=True)
+
         try:
             raw_df.to_sql(table, engine, index=False, chunksize=None, if_exists='append', method="multi")
         except Exception as error2:
