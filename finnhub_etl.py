@@ -102,6 +102,11 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
         logging.info('finish ' + each_stock + ' time: ' + str(now - start) + 'total time: '
                      + str(now - process_start_time) + 'total numbers: ' + str(num_of_stock)
                      + ' Period: ' + str(step_period))
+        if interval_i == 'daily':
+            time.sleep(0.5)
+        elif interval_i == '1m':
+            time.sleep(1)
+
     return True
 
 
@@ -130,20 +135,20 @@ if __name__ == '__main__':
 
     logging.info("ETL process started at %s: ", {process_start_time})
 
-    # try:
-    #     sms_text = f"ETL process started at {process_start_time}"
-    #     msg_email_service.send_sms(sms_text)
-    # except Exception as errors:
-    #     print(errors, "couldn't send out message")
-    #     logging.error("couldn't send out message", exc_info=True)
-    #
-    # try:
-    #     email_subject = f"ETL process started at {process_start_time}"
-    #     email_body_text = f"ETL process started at {process_start_time}"
-    #     msg_email_service.send_email(email_subject, email_body_text)
-    # except Exception as errors:
-    #     print(errors, "couldn't send out Email")
-    #     logging.error("couldn't send out Email", exc_info=True)
+    try:
+        sms_text = f"ETL process started at {process_start_time}"
+        msg_email_service.send_sms(sms_text)
+    except Exception as errors:
+        print(errors, "couldn't send out message")
+        logging.error("couldn't send out message", exc_info=True)
+
+    try:
+        email_subject = f"ETL process started at {process_start_time}"
+        email_body_text = f"ETL process started at {process_start_time}"
+        msg_email_service.send_email(email_subject, email_body_text)
+    except Exception as errors:
+        print(errors, "couldn't send out Email")
+        logging.error("couldn't send out Email", exc_info=True)
 
     if scope == 'ALL':
         start_time = int((init_mark_day - base_time).total_seconds())
@@ -213,6 +218,13 @@ if __name__ == '__main__':
         db_engine = db_util.sqlalchemy_create_db_engine()
         interval = 'daily'
         etl = daily_etl(db_engine, interval, start_time, end_time)
+        try:
+            sms_text = f"ETL process finished daily load."
+            msg_email_service.send_sms(sms_text)
+        except Exception as errors:
+            print(errors, "couldn't send out message")
+            logging.error("couldn't send out message", exc_info=True)
+
         interval = '1m'
         etl2 = daily_etl(db_engine, interval, start_time, end_time)
 
@@ -236,20 +248,20 @@ if __name__ == '__main__':
         quit()
 
     process_end_time = eastern_tz.localize(datetime.datetime.now())
-    # try:
-    #     sms_text = f"ETL process finished at {process_end_time}"
-    #     msg_email_service.send_sms(sms_text)
-    # except Exception as errors:
-    #     print(errors, "couldn't send out message")
-    #     logging.error("couldn't send out message", exc_info=True)
-    #
-    # try:
-    #     email_subject = f"ETL process finished at {process_end_time}"
-    #     email_body_text = f"ETL process finished at {process_end_time}"
-    #     msg_email_service.send_email(email_subject, email_body_text)
-    # except Exception as errors:
-    #     print(errors, "couldn't send out Email")
-    #     logging.error("couldn't send out Email", exc_info=True)
+    try:
+        sms_text = f"ETL process finished at {process_end_time}"
+        msg_email_service.send_sms(sms_text)
+    except Exception as errors:
+        print(errors, "couldn't send out message")
+        logging.error("couldn't send out message", exc_info=True)
+
+    try:
+        email_subject = f"ETL process finished at {process_end_time}"
+        email_body_text = f"ETL process finished at {process_end_time}"
+        msg_email_service.send_email(email_subject, email_body_text)
+    except Exception as errors:
+        print(errors, "couldn't send out Email")
+        logging.error("couldn't send out Email", exc_info=True)
 
     logging.info("ETL process ended at %s: ", {process_end_time})
 
