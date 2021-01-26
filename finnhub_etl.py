@@ -72,16 +72,24 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
             logging.error("download_data_from_finnhub error", exc_info=True)
             continue
 
+        index_names = raw_df[(raw_df['t'] < start_time_i)].index
+        raw_df.drop(index_names, inplace=True)
+        index_names = raw_df[(raw_df['t'] > end_time_i)].index
+        raw_df.drop(index_names, inplace=True)
+
         raw_df['symbol'] = es
 
         if interval == 'daily':
-            raw_df['trade_date_int'] = [db_util.datetime_to_int_todate(datetime.datetime.fromtimestamp(x).date())
+            raw_df['trade_date_int'] = [db_util.datetime_to_int_todate(datetime.datetime.fromtimestamp(x,
+                                        tz=pytz.timezone("UTC")).date())
                                         for x in raw_df['t']]
         elif interval == '1m':
-            raw_df['trade_date_int'] = [db_util.datetime_to_int_todate(datetime.datetime.fromtimestamp(x).date())
+            raw_df['trade_date_int'] = [db_util.datetime_to_int_todate(datetime.datetime.fromtimestamp(x,
+                                        tz=pytz.timezone("UTC")).date())
                                         for x in raw_df['t']]
 
-        raw_df['t'] = pandas.to_datetime(raw_df['t'], unit='s')
+        raw_df['t'] = datetime.datetime.fromtimestamp(int(raw_df['t']), tz=pytz.timezone("UTC"))
+        # raw_df['t'] = pandas.to_datetime(raw_df['t'], unit='s')
 
         raw_df = raw_df.rename({'c': 'close_price', 'h': 'high_price', 'l': 'low_price', 'o': 'open_price',
                                 's': 'return_status', 't': 'trade_time', 'v': 'volume'}, axis='columns')
@@ -90,10 +98,6 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
 #        raw_df.drop(columns='index')
 
 #        raw_df.to_sql(table, engine, index=False, chunksize=None, if_exists='append', method="multi")
-        index_names = raw_df[(raw_df['trade_date_int'] < day_to_run_int)].index
-        raw_df.drop(index_names, inplace=True)
-        index_names = raw_df[(raw_df['trade_date_int'] > day_to_run_int)].index
-        raw_df.drop(index_names, inplace=True)
 
         try:
             raw_df.to_sql(table, engine, index=False, chunksize=None, if_exists='append', method="multi")
@@ -134,8 +138,6 @@ if __name__ == '__main__':
     init_mark_day = datetime.datetime(2000, 1, 1).date()
     # cut_off_day = datetime.datetime(2001, 1, 1).date()
     cut_off_day = today
-    start_time = int((yesterday - base_time).total_seconds())
-    end_time = int((today - base_time).total_seconds())
     step_period = 0
 
     logging.info("ETL process started at %s: ", {process_start_time})
@@ -156,8 +158,8 @@ if __name__ == '__main__':
         logging.error("couldn't send out Email", exc_info=True)
 
     if scope == 'ALL':
-        start_time = int((init_mark_day - base_time).total_seconds())
-        end_time = int((cut_off_day - base_time).total_seconds())
+        start_time = db_util.dt_utc_start_end(init_mark_day)[2]
+        end_time = db_util.dt_utc_start_end(today)[3]
         if resolution == "D":
             interval = 'daily'
             psycopg2_connect = db_util.psycopg2_connect_to_db()

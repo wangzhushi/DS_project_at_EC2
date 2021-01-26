@@ -37,9 +37,9 @@ def sqlalchemy_create_db_engine():
     port = DB_CONFIG["PORT"]
 
 #    url_eg = f'postgresql://user:{password}@{host}:{port}/{database}'
-    url_eg = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database
-    print(url_eg)
-#     #    db_engine = create_engine('postgresql://scott:tiger@localhost/mydatabase')
+#     url_eg = "postgresql://" + user + ":" + password + "@" + host + ":" + port + "/" + database
+#     print(url_eg)
+#     db_engine = create_engine('postgresql://scott:tiger@localhost/mydatabase')
 #     db_engine = create_engine(url_eg, pool_size=10, max_overflow=20)
     try:
         db_engine = create_engine("postgresql://{user}:{pw}@{host}:{port}/{db}".format(
@@ -84,6 +84,9 @@ def dt_utc_start_end(date_input=dt.date.today()):
     """
     start_of_the_day = dt.datetime.combine(date_input, dt.time(00, 00, 00))
     end_of_the_day = dt.datetime.combine(date_input, dt.time(23, 59, 59))
+    # start_of_the_day_utc = int(start_of_the_day.timestamp())
+    # end_of_the_day_utc = int(end_of_the_day.timestamp())
+
     base_time = dt.datetime(1970, 1, 1, 00, 00, 00)
     start_of_the_day_utc = int((start_of_the_day - base_time).total_seconds())
     end_of_the_day_utc = int((end_of_the_day - base_time).total_seconds())
