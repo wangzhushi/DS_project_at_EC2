@@ -8,6 +8,8 @@ import finnhub
 import time
 from project_utils import msg_email_service
 import logging
+from pathlib import Path
+from sys import platform
 
 
 def read_stock_list(file_name):
@@ -43,8 +45,12 @@ def download_data_from_finnhub(security_symbol, interval, start_time, end_time):
 
 def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
     # stock_list = read_stock_list("../../postgresql/data/harry_sec_list_1000.csv")
-    stock_list = read_stock_list("/home/ubuntu/DS_project/harry_sec_list_1000.csv")
-    # stock_list = read_stock_list("harry_sec_list_1000.csv")
+
+    if platform == "win32":
+        stock_list = read_stock_list("harry_sec_list_1000.csv")
+    else:
+        stock_list = read_stock_list("/home/ubuntu/DS_project/harry_sec_list_1000.csv")
+
     # stock_list = ['AAPL', 'TSLA']
     # engine = create_engine('sqlite://', echo=False)
     # engine = db_util.sqlalchemy_create_db_engine()
@@ -111,10 +117,10 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
         logging.info('finish ' + each_stock + ' time: ' + str(now - start) + 'total time: '
                      + str(now - process_start_time) + 'total numbers: ' + str(num_of_stock)
                      + ' Period: ' + str(step_period))
-        if interval_i == 'daily':
-            time.sleep(0.8)
-        elif interval_i == '1m':
-            time.sleep(1)
+        # if interval_i == 'daily':
+        #     time.sleep(0.8)
+        # elif interval_i == '1m':
+        time.sleep(1)
 
     return True
 
@@ -126,7 +132,12 @@ if __name__ == '__main__':
     scope = 'ONE'
     resolution = 'M'
 
-    LOG_FILENAME = datetime.datetime.now().strftime('logfile_%H_%M_%S_%d_%m_%Y.log')
+    if platform == "win32":
+        LOG_FILENAME = datetime.datetime.now().strftime('logfile_%H_%M_%S_%d_%m_%Y.log')
+    else:
+        log_folder = Path("/home/ubuntu/log/")
+        LOG_FILENAME = log_folder / datetime.datetime.now().strftime('logfile_%H_%M_%S_%d_%m_%Y.log')
+
     logging.basicConfig(filename=LOG_FILENAME, level=logging.INFO, format='%(asctime)s-%(levelname)s-%(message)s')
     eastern_tz = pytz.timezone("US/Eastern")
     process_start_time = eastern_tz.localize(datetime.datetime.today())
