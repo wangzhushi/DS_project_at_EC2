@@ -88,8 +88,8 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
                                         tz=pytz.timezone("UTC")).date())
                                         for x in raw_df['t']]
 
-        raw_df['t'] = datetime.datetime.fromtimestamp(int(raw_df['t']), tz=pytz.timezone("UTC"))
-        # raw_df['t'] = pandas.to_datetime(raw_df['t'], unit='s')
+        # raw_df['t'] = datetime.datetime.fromtimestamp(int(raw_df['t']), tz=pytz.timezone("UTC"))
+        raw_df['t'] = pandas.to_datetime(raw_df['t'], unit='s')
 
         raw_df = raw_df.rename({'c': 'close_price', 'h': 'high_price', 'l': 'low_price', 'o': 'open_price',
                                 's': 'return_status', 't': 'trade_time', 'v': 'volume'}, axis='columns')
@@ -112,7 +112,7 @@ def daily_etl(db_engine_i, interval_i, start_time_i, end_time_i):
                      + str(now - process_start_time) + 'total numbers: ' + str(num_of_stock)
                      + ' Period: ' + str(step_period))
         if interval_i == 'daily':
-            time.sleep(0.5)
+            time.sleep(0.8)
         elif interval_i == '1m':
             time.sleep(1)
 
@@ -149,13 +149,13 @@ if __name__ == '__main__':
         print(errors, "couldn't send out message")
         logging.error("couldn't send out message", exc_info=True)
 
-    try:
-        email_subject = f"ETL process started at {process_start_time}"
-        email_body_text = f"ETL process started at {process_start_time}"
-        msg_email_service.send_email(email_subject, email_body_text)
-    except Exception as errors:
-        print(errors, "couldn't send out Email")
-        logging.error("couldn't send out Email", exc_info=True)
+    # try:
+    #     email_subject = f"ETL process started at {process_start_time}"
+    #     email_body_text = f"ETL process started at {process_start_time}"
+    #     msg_email_service.send_email(email_subject, email_body_text)
+    # except Exception as errors:
+    #     print(errors, "couldn't send out Email")
+    #     logging.error("couldn't send out Email", exc_info=True)
 
     if scope == 'ALL':
         start_time = db_util.dt_utc_start_end(init_mark_day)[2]
@@ -205,8 +205,8 @@ if __name__ == '__main__':
                 start_time = end_time + 1
 
     elif scope == 'ONE':
-        # day_to_run = eastern_tz.localize(datetime.datetime.today()).date()
-        day_to_run = datetime.datetime(2021, 1, 22).date()
+        day_to_run = eastern_tz.localize(datetime.datetime.today()).date()
+        # day_to_run = datetime.datetime(2021, 1, 29).date()
         day_to_run_int = db_util.datetime_to_int_todate(day_to_run)
 
         day_to_run_info = db_util.dt_utc_start_end(day_to_run)
@@ -262,13 +262,13 @@ if __name__ == '__main__':
         print(errors, "couldn't send out message")
         logging.error("couldn't send out message", exc_info=True)
 
-    try:
-        email_subject = f"ETL process finished at {process_end_time}"
-        email_body_text = f"ETL process finished at {process_end_time}"
-        msg_email_service.send_email(email_subject, email_body_text)
-    except Exception as errors:
-        print(errors, "couldn't send out Email")
-        logging.error("couldn't send out Email", exc_info=True)
+    # try:
+    #     email_subject = f"ETL process finished at {process_end_time}"
+    #     email_body_text = f"ETL process finished at {process_end_time}"
+    #     msg_email_service.send_email(email_subject, email_body_text)
+    # except Exception as errors:
+    #     print(errors, "couldn't send out Email")
+    #     logging.error("couldn't send out Email", exc_info=True)
 
     logging.info("ETL process ended at %s: ", {process_end_time})
 
